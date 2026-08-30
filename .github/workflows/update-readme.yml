@@ -3,32 +3,32 @@ name: Auto-Update README Index
 on:
   push:
     branches:
-      - main  # Adjust this if your default branch is named master
-  workflow_dispatch: # Allows you to trigger it manually via the GitHub interface if needed
+      - main
+  workflow_dispatch:
 
 jobs:
-  rebuild-index:
+  refresh-index:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository Code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Python Environment
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-python: '3.x'
+          python-version: '3.x'
 
-      - name: Run Readme Generator Script
+      - name: Run Script
         run: python .github/scripts/generate_readme.py
 
-      - name: Commit and Push Changes back to Repo
+      - name: Commit Structural Updates
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add README.md
           if git diff --cached --quiet; then
-            echo "No directory variations detected. Skipping commit."
+            echo "No directory changes detected."
           else
-            git commit -m "chore: auto-regenerate master readme index [skip ci]"
+            git commit -m "chore: auto-update index documentation [skip ci]"
             git push
           fi

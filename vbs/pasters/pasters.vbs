@@ -25,7 +25,7 @@ Set stream = CreateObject("ADODB.Stream")
 stream.Type = 1: stream.Open: stream.LoadFromFile target
 Set http = CreateObject("MSXML2.ServerXMLHTTP.6.0")
 http.Open "POST", "https://paste.rs/", False
-http.Send stream.Read
+http.Send stream
 url = Trim(http.responseText)
 stream.Close
 If Err.Number <> 0 Or http.Status <> 201 Or Left(LCase(url), 4) <> "http" Then

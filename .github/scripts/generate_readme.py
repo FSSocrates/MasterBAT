@@ -8,12 +8,15 @@ END_MARKER = "<!-- DIRECTORY_LIST:END -->"
 IGNORED_DIRECTORIES = ["git", "github", "docs", "assets"]
 
 def build_directory_tree():
-    markdown_output =
+    markdown_output = []
     
     # 1. Grab every visible top-level folder inside your repository root dynamically
+    if not os.path.exists(""):
+        return ""
+        
     root_contents = sorted([
-        d for d in oslistdir("") 
-        if ospathisdir(d) and d not in IGNORED_DIRECTORIES
+        d for d in os.listdir(".") 
+        if os.path.isdir(d) and not d.startswith(".") and d not in IGNORED_DIRECTORIES
     ])
     
     for extension_folder in root_contents:
@@ -23,8 +26,8 @@ def build_directory_tree():
         
         # 2. Dynamically scan all inner utility workspace subfolders
         utility_folders = sorted([
-            f for f in oslistdir(extension_folder) 
-            if ospathisdir(ospathjoin(extension_folder, f))
+            f for f in os.listdir(extension_folder) 
+            if os.path.isdir(os.path.join(extension_folder, f))
         ])
         
         for utility in utility_folders:

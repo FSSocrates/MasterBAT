@@ -7,8 +7,6 @@ This repository is organized strictly by extension type folders at the top level
 ## 📁 Repository Directory
 
 <!-- DIRECTORY_LIST:START -->
-- **[bat](./bat)**
-  - [pasters](./bat/pasters)
 - **[vbs](./vbs)**
   - [pasters](./vbs/pasters)
 <!-- DIRECTORY_LIST:END -->

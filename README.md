@@ -8,6 +8,7 @@ This repository is organized strictly by extension type folders at the top level
 
 <!-- DIRECTORY_LIST:START -->
 - **[vbs](./vbs)**
+  - [RawText](./vbs/RawText)
   - [pasters](./vbs/pasters)
 <!-- DIRECTORY_LIST:END -->
 

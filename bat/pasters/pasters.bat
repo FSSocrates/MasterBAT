@@ -1,5 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
+title Paste.rs Batch Script
 
 set "ScriptDir=%~dp0"
 set "ScriptName=%~n0"

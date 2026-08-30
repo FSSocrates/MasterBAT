@@ -1,15 +1,11 @@
 Option Explicit
 
-' pasters.vbs – upload companion file to a public paste host
-' Put this .vbs next to a file with the same base name (any other extension).
-
-Const SERVER = "https://paste.c-net.org/"
+Const SERVER = "https://paste.rs/"
 
 Dim fso, shell, dir, baseName, target, f
 Dim http, stream, bytes, status, url, errNum
 
-Set fso   = CreateObject("Scripting.FileSystemObject")
-Set shell = CreateObject("WScript.Shell")
+Set fso = CreateObject("Scripting.FileSystemObject")
 
 dir      = fso.GetParentFolderName(WScript.ScriptFullName) & "\"
 baseName = fso.GetBaseName(WScript.ScriptFullName)
@@ -50,8 +46,8 @@ End If
 Set http = CreateObject("WinHttp.WinHttpRequest.5.1")
 http.SetTimeouts 15000, 15000, 60000, 60000
 http.Open "POST", SERVER, False
-http.SetRequestHeader "Content-Type", "application/octet-stream"
-http.SetRequestHeader "User-Agent", "RawText-vbs/2.2"
+http.SetRequestHeader "Content-Type", "text/plain"
+http.SetRequestHeader "User-Agent", "RawText-vbs/2.3"
 http.Send bytes
 
 errNum = Err.Number
@@ -64,21 +60,27 @@ If errNum = 0 Then
 End If
 
 Set http = Nothing
-On Error GoTo 0
 
 If errNum <> 0 Then
     MsgBox "Network error (" & errNum & ")", 16, "RawText"
     WScript.Quit 1
 End If
 
-' paste.c-net.org returns 200 + URL; some hosts return 201
 If (status = 200 Or status = 201) And LCase(Left(url, 4)) = "http" Then
-    shell.Run "cmd.exe /c echo|set /p=""" & url & """|clip", 0, True
+    Set shell = CreateObject("WScript.Shell")
+    ' 0 hides the window completely, True waits for execution
+    shell.Run "powershell.exe -NoProfile -Command ""Set-Clipboard -Value '" & url & "'""", 0, True
+    
+    If Err.Number <> 0 Then
+        Err.Clear
+        shell.Run "cmd.exe /c <nul set /p=""" & url & """ | clip", 0, True
+    End If
+    
     MsgBox "Upload successful." & vbCrLf & vbCrLf & url, 64, "RawText"
+    On Error GoTo 0
     WScript.Quit 0
 End If
 
-MsgBox "Upload failed." & vbCrLf & _
-       "HTTP status: " & status & vbCrLf & _
-       "Response: " & Left(url, 300), 16, "RawText"
+On Error GoTo 0
+MsgBox "Upload failed." & vbCrLf & "HTTP status: " & status & vbCrLf & "Response: " & Left(url, 300), 16, "RawText"
 WScript.Quit 1

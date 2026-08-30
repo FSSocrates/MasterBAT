@@ -1,4 +1,4 @@
-# pasters
+# RawText
 
 A lightweight Windows VBScript that uploads a companion data file to a public raw-paste host and copies the returned URL to the clipboard.
 

@@ -30,3 +30,7 @@ The specific extension of your data file does not matter, as long as the base na
 - **Execution:** Double-click or trigger the `.bat` script.
 - **Success:** A native system toast notification alerts you that the pipeline succeeded. Press `Ctrl + V` anywhere to share the direct, raw data web link.
 - **Failure:** A warning toast notification reports whether the sibling data payload could not be located or if a network communication timeout occurred.
+
+## 🛠️ Acknowledgements
+
+Special thanks to **[mstallmo/paste.rs](https://github.com/mstallmo/paste.rs)** for creating and maintaining the minimalist open-source backend engine utilized by the `pasters` toolchain pipeline.

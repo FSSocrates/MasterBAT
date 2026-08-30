@@ -9,6 +9,7 @@ This repository is organized strictly by extension type folders at the top level
 ## 📁 Repository Directory
 
 <!-- DIRECTORY_LIST:START -->
+
 <!-- DIRECTORY_LIST:END -->
 
 ---

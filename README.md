@@ -4,15 +4,10 @@ A centralized, structural repository for hosting personal go-to automation utili
 
 This repository is organized strictly by extension type folders at the top level, with each utility contained inside its own dedicated workspace subfolder alongside its documentation and assets.
 
----
-
 ## 📁 Repository Directory
 
 <!-- DIRECTORY_LIST:START -->
-
 <!-- DIRECTORY_LIST:END -->
-
----
 
 ## ⚙️ General Usage Note
 

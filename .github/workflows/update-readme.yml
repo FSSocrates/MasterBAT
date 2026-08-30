@@ -9,6 +9,11 @@ on:
 jobs:
   refresh-index:
     runs-on: ubuntu-latest
+    
+    # Add these two lines to grant write permissions to the repository contents
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4

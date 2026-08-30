@@ -4,6 +4,14 @@ A lightweight Windows utility that dynamically streams the binary contents of an
 
 It executes completely in the background via a hidden instance of PowerShell—preventing command-line window flashes—and handles status tracking purely through native Windows Desktop toast notifications.
 
+## ⚙️ What it does
+
+When you run the batch script, it performs the following automated steps in the background:
+1. **Scans the directory:** It automatically finds the single data payload sharing its exact base name (ignoring the file extension).
+2. **Streams the data:** It opens an invisible network tunnel and uploads that target file as raw binary data directly to the automated pasting service `paste.rs`.
+3. **Copies the URL:** It grabs the clean text URL returned by the server and copies it straight into your Windows clipboard.
+4. **Notifies you:** It triggers a native Windows toast notification to tell you whether the upload succeeded or failed, meaning you never have to guess or check a command prompt window.
+
 ## 📁 Workspace Structure
 
 To use this utility, place it inside its own workspace directory alongside a single target data payload. **You must rename the `.bat` file to have the exact same base name as the target file.** 

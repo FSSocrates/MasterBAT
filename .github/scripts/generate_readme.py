@@ -11,7 +11,7 @@ def build_directory_tree():
     markdown_output = []
     
     # 1. Grab every visible top-level folder inside your repository root dynamically
-    if not os.path.exists(""):
+    if not os.path.exists("."):
         return ""
         
     root_contents = sorted([

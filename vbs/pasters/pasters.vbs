@@ -20,12 +20,15 @@ If target = "" Then
     MsgBox "Upload Failed: Could not find a companion data file named " & name & ".*", 16, "Paste.rs VB Script"
     WScript.Quit
 End If
-Set exec = shell.Exec("curl --data-binary @""" & target & """ https://paste.rs/")
+Set exec = shell.Exec("curl -s --data-binary @""" & target & """ https://paste.rs/")
+Do While exec.Status = 0
+    WScript.Sleep 100
+Loop
 url = ""
 Do While Not exec.StdOut.AtEndOfStream
     url = Trim(exec.StdOut.ReadLine)
 Loop
-If exec.ExitCode <> 0 Or Left(LCase(url), 4) <> "http" Then
+If Left(LCase(url), 4) <> "http" Then
     MsgBox "Upload Failed: Server returned an invalid response or a network error occurred.", 16, "Paste.rs VB Script"
     WScript.Quit
 End If

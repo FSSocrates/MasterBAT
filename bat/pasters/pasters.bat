@@ -13,18 +13,22 @@ for %%F in ("!ScriptDir!!ScriptName!.*") do (
 )
 
 if not defined TargetFile (
-    msg * "Upload Failed: Could not find a companion data file named %ScriptName%.*"
+    echo MsgBox "Upload Failed: Could not find a companion data file named %ScriptName%.*", 16, "Paste.rs Batch Script" > "%temp%\alert.vbs"
+    cscript //nologo "%temp%\alert.vbs" & del "%temp%\alert.vbs"
     exit /b
 )
 
 for /f "delims=" %%I in ('curl --data-binary @"!TargetFile!" https://paste.rs 2^>nul') do set "ResponseURL=%%I"
 
 if not defined ResponseURL (
-    msg * "Upload Failed: Network error or server timed out while transferring."
+    echo MsgBox "Upload Failed: Network error or server timed out while transferring.", 16, "Paste.rs Batch Script" > "%temp%\alert.vbs"
+    cscript //nologo "%temp%\alert.vbs" & del "%temp%\alert.vbs"
     exit /b
 )
 
 echo | set /p="%ResponseURL%" | clip
-msg * "Upload Successful: The raw data link has been copied to your clipboard."
+
+echo MsgBox "Upload Successful: The raw data link has been copied to your clipboard.", 64, "Paste.rs Batch Script" > "%temp%\alert.vbs"
+cscript //nologo "%temp%\alert.vbs" & del "%temp%\alert.vbs"
 
 exit /b

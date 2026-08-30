@@ -17,7 +17,7 @@ If fso.FolderExists(dir) Then
     Next
 End If
 If target = "" Then
-    MsgBox "Upload Failed: Could not find a companion data file named " & name & ".*", 16, "Paste.rs Batch Script"
+    MsgBox "Upload Failed: Could not find a companion data file named " & name & ".*", 16, "Paste.rs VB Script"
     WScript.Quit
 End If
 Set exec = shell.Exec("curl --data-binary @""" & target & """ https://paste.rs")
@@ -26,8 +26,8 @@ Do While Not exec.StdOut.AtEndOfStream
     url = Trim(exec.StdOut.ReadLine)
 Loop
 If url = "" Then
-    MsgBox "Upload Failed: Network error or server timed out while transferring.", 16, "Paste.rs Batch Script"
+    MsgBox "Upload Failed: Network error or server timed out while transferring.", 16, "Paste.rs VB Script"
     WScript.Quit
 End If
 shell.Run "cmd.exe /c echo | set /p=""" & url & """ | clip", 0, True
-MsgBox "Upload Successful: The raw data link has been copied to your clipboard.", 64, "Paste.rs Batch Script"
+MsgBox "Upload Successful: The raw data link has been copied to your clipboard.", 64, "Paste.rs VB Script"

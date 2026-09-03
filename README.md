@@ -7,6 +7,8 @@ This repository is organized strictly by extension type folders at the top level
 ## 📁 Repository Directory
 
 <!-- DIRECTORY_LIST:START -->
+- **[Documents](./Documents)**
+  - [RawBin](./Documents/RawBin)
 - **[vbs](./vbs)**
   - [RawText](./vbs/RawText)
 <!-- DIRECTORY_LIST:END -->

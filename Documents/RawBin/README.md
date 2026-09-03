@@ -1,4 +1,4 @@
-# RawText
+# RawBin
 
 A lightweight Windows VBScript that uploads a companion file to a public raw-paste service and copies the returned URL to the clipboard.
 
@@ -28,7 +28,7 @@ For example, if the script is renamed to `Report.vbs`, it will look for the firs
 
 ## Usage
 
-1. Place `RawText.vbs` beside the file you want to upload.
+1. Place `RawBin.vbs` beside the file you want to upload.
 
 2. Rename both files so they have the same base name.
 

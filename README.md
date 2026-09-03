@@ -7,10 +7,10 @@ This repository is organized strictly by extension type folders at the top level
 ## 📁 Repository Directory
 
 <!-- DIRECTORY_LIST:START -->
-- **[Audio](./Audio)**
-  - [Loud and Clear AF Bass Boosted](./Audio/Loud%20and%20Clear%20AF%20Bass%20Boosted)
 - **[Documents](./Documents)**
   - [RawBin](./Documents/RawBin)
+- **[Music](./Music)**
+  - [Loud and Clear AF Bass Boosted](./Music/Loud%20and%20Clear%20AF%20Bass%20Boosted)
 <!-- DIRECTORY_LIST:END -->
 
 ## ⚙️ General Usage Note

@@ -23,7 +23,7 @@ If fso.FolderExists(dir) Then
 End If
 
 If target = "" Then
-    MsgBox "Could not find companion file named """ & baseName & ".*""", 16, "RawText"
+    MsgBox "Could not find companion file named """ & baseName & ".*""", 16, "RawBin"
     WScript.Quit 1
 End If
 
@@ -39,7 +39,7 @@ stream.Close
 Set stream = Nothing
 
 If Err.Number <> 0 Or IsEmpty(bytes) Then
-    MsgBox "Failed to read file:" & vbCrLf & target, 16, "RawText"
+    MsgBox "Failed to read file:" & vbCrLf & target, 16, "RawBin"
     WScript.Quit 1
 End If
 
@@ -47,7 +47,7 @@ Set http = CreateObject("WinHttp.WinHttpRequest.5.1")
 http.SetTimeouts 15000, 15000, 60000, 60000
 http.Open "POST", SERVER, False
 http.SetRequestHeader "Content-Type", "text/plain"
-http.SetRequestHeader "User-Agent", "RawText-vbs/2.3"
+http.SetRequestHeader "User-Agent", "RawBin-vbs/2.3"
 http.Send bytes
 
 errNum = Err.Number
@@ -62,7 +62,7 @@ End If
 Set http = Nothing
 
 If errNum <> 0 Then
-    MsgBox "Network error (" & errNum & ")", 16, "RawText"
+    MsgBox "Network error (" & errNum & ")", 16, "RawBin"
     WScript.Quit 1
 End If
 
@@ -76,11 +76,11 @@ If (status = 200 Or status = 201) And LCase(Left(url, 4)) = "http" Then
         shell.Run "cmd.exe /c <nul set /p=""" & url & """ | clip", 0, True
     End If
     
-    MsgBox "Upload successful." & vbCrLf & vbCrLf & url, 64, "RawText"
+    MsgBox "Upload successful." & vbCrLf & vbCrLf & url, 64, "RawBin"
     On Error GoTo 0
     WScript.Quit 0
 End If
 
 On Error GoTo 0
-MsgBox "Upload failed." & vbCrLf & "HTTP status: " & status & vbCrLf & "Response: " & Left(url, 300), 16, "RawText"
+MsgBox "Upload failed." & vbCrLf & "HTTP status: " & status & vbCrLf & "Response: " & Left(url, 300), 16, "RawBin"
 WScript.Quit 1

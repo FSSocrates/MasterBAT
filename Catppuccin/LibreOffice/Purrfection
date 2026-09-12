@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
-#  Purrfection.sh — Catppuccin theme switcher for LibreOffice
+#  Purrfection — Catppuccin theme switcher for LibreOffice
 #  Self-contained interactive + non-interactive installer
 # ─────────────────────────────────────────────────────────────
 
@@ -89,7 +89,6 @@ Accents : ${accents[*]}
 EOF
 }
 
-# ── Find registrymodifications.xcu ───────────────────────────
 find_xcu() {
   local flatpak_glob="$HOME/.var/app/org.libreoffice.LibreOffice/config/libreoffice/*/user/registrymodifications.xcu"
   if compgen -G "$flatpak_glob" &>/dev/null; then
@@ -105,7 +104,6 @@ find_xcu() {
   echo ""
 }
 
-# ── Detect current theme ────────────────────────────────────
 detect_current() {
   local xcu
   xcu=$(find_xcu)
@@ -116,12 +114,10 @@ detect_current() {
     return 1
   fi
 
-  # Look for the most recent catppuccin-*.soc reference inside the xcu
   local current
   current=$(grep -oE 'catppuccin-[a-z]+-[a-z]+\.soc' "$xcu" 2>/dev/null | tail -1 || true)
 
   if [[ -z "$current" ]]; then
-    # Fallback: check the config directory for any installed .soc
     local config_dir
     config_dir=$(ls -d "${XDG_CONFIG_HOME:-$HOME/.config}"/libreoffice/*/user/config 2>/dev/null | head -1)
     [[ -z "$config_dir" ]] && config_dir=$(ls -d "$HOME/.var/app/org.libreoffice.LibreOffice/config/libreoffice"/*/user/config 2>/dev/null | head -1)
@@ -132,7 +128,6 @@ detect_current() {
   fi
 
   if [[ -n "$current" ]]; then
-    # Extract flavor and accent from filename: catppuccin-mocha-blue.soc
     local name="${current%.soc}"
     local flavor="${name#catppuccin-}"
     flavor="${flavor%-*}"
@@ -150,7 +145,6 @@ detect_current() {
   fi
 }
 
-# ── Interactive pickers ─────────────────────────────────────
 pick_flavor() {
   if [[ -n "${1:-}" ]]; then
     flavor="$1"
@@ -183,11 +177,10 @@ pick_accent() {
   accent="${accents[$((n-1))]}"
 }
 
-# ── Apply theme ─────────────────────────────────────────────
 apply() {
   local tmp
   tmp="$(mktemp -d)"
-  trap 'rm -rf "$tmp"' EXIT
+  trap "rm -rf -- '$tmp'" EXIT
 
   local soc_url="$BASE_URL/themes/$flavor/$accent/catppuccin-$flavor-$accent.soc"
   local soc_file="$tmp/catppuccin-$flavor-$accent.soc"
@@ -199,7 +192,6 @@ apply() {
     exit 1
   fi
 
-  # 1. Install palette
   local config_dir
   config_dir=$(ls -d "${XDG_CONFIG_HOME:-$HOME/.config}"/libreoffice/*/user/config 2>/dev/null | head -1)
   [[ -z "$config_dir" ]] && config_dir=$(ls -d "$HOME/.var/app/org.libreoffice.LibreOffice/config/libreoffice"/*/user/config 2>/dev/null | head -1)
@@ -210,12 +202,10 @@ apply() {
     exit 1
   fi
 
-  # Clean old catppuccin palettes to avoid clutter
   rm -f "$config_dir"/catppuccin-*.soc 2>/dev/null || true
   cp "$soc_file" "$config_dir/"
   echo -e "  ${C_GREEN}✓${R} Palette installed → $config_dir"
 
-  # 2. Apply application colors
   local xcu
   xcu=$(find_xcu)
 
@@ -231,16 +221,13 @@ apply() {
     exit 1
   fi
 
-  # Backup
   local bak="${xcu}.$(date -u +%Y-%m-%dT%H:%M:%SZ).bak"
   cp "$xcu" "$bak"
   echo -e "  ${C_GREEN}✓${R} Backup created → $(basename "$bak")"
 
-  # Remove any previous Catppuccin entries to avoid duplicates
   local cleaned
   cleaned=$(grep -v 'catppuccin-.*\.soc' "$xcu" || true)
 
-  # Inject new theme just before the closing tag
   local new_settings
   new_settings="$(printf '%s\n' "$cleaned" | head -n -1)
 $(cat "$soc_file")
@@ -280,7 +267,6 @@ while [[ $# -gt 0 ]]; do
       exit 1
       ;;
     *)
-      # positional: flavor accent
       if [[ -z "$flavor" ]]; then
         flavor="$1"
       elif [[ -z "$accent" ]]; then
@@ -304,14 +290,12 @@ if $show_current; then
   exit 0
 fi
 
-# Validate if non-interactive values were given
 if [[ -n "$flavor" && -z "$accent" ]] || [[ -z "$flavor" && -n "$accent" ]]; then
   echo -e "  ${C_RED}✗${R} Both flavor and accent are required in non-interactive mode." >&2
   exit 1
 fi
 
 if [[ -n "$flavor" ]]; then
-  # Non-interactive validation
   if [[ ! " ${flavors[*]} " =~ " ${flavor} " ]]; then
     echo -e "  ${C_RED}✗${R} Invalid flavor: $flavor" >&2
     exit 1
@@ -321,7 +305,6 @@ if [[ -n "$flavor" ]]; then
     exit 1
   fi
 else
-  # Interactive
   pick_flavor
   pick_accent
 fi

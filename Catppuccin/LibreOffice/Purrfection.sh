@@ -8,7 +8,7 @@
 set -euo pipefail
 
 BASE_URL="https://raw.githubusercontent.com/catppuccin/libreoffice/main"
-CONFIG_DIR=$(ls -d "${XDG_CONFIG_HOME:-$HOME}"/.config/libreoffice/*/user/config 2>/dev/null | head -1)
+CONFIG_DIR=$(ls -d "${XDG_CONFIG_HOME:-$HOME/.config}"/libreoffice/*/user/config 2>/dev/null | head -1)
 
 # ── Colors ──────────────────────────────────────────────────
 R=$'\e[0m'  B=$'\e[1m'
@@ -116,6 +116,17 @@ apply() {
   fi
 
   cp "$tmp/palette.soc" "$CONFIG_DIR"
+
+  # Resolve xcu path and patch the upstream script to use it
+  local xcu
+  xcu=$(find "${XDG_CONFIG_HOME:-$HOME/.config}/libreoffice" -name "registrymodifications.xcu" 2>/dev/null | head -1)
+  if [[ -z "$xcu" ]]; then
+    echo -e "  ${C_RED}✗${R} registrymodifications.xcu not found."
+    echo -e "  Open LibreOffice once, enable theming, close it, then re-run." >&2
+    rm -rf "$tmp"; exit 1
+  fi
+
+  sed -i "s|realpath .*|realpath '$xcu'|" "$tmp/install.sh"
   bash "$tmp/install.sh" "$flavor" "$accent"
 
   rm -rf "$tmp"

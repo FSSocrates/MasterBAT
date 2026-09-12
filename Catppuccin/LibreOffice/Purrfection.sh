@@ -8,7 +8,7 @@
 set -euo pipefail
 
 BASE="https://raw.githubusercontent.com/catppuccin/libreoffice/main"
-CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/libreoffice/"*/user/config
+CONFIG_DIR=$(ls -d "${XDG_CONFIG_HOME:-$HOME/.config}"/libreoffice/*/user/config 2>/dev/null | head -1)
 
 # ── Colors ──────────────────────────────────────────────────
 R=$'\e[0m'  B=$'\e[1m'

@@ -182,6 +182,14 @@ apply() {
   tmp="$(mktemp -d)"
   trap "rm -rf -- '$tmp'" EXIT
 
+  # Force-quit LibreOffice so the registry file is not locked
+  if pgrep -x soffice.bin >/dev/null || pgrep -f "soffice" >/dev/null; then
+    echo -e "  ${B}⏹${R} Closing LibreOffice…"
+    pkill -f "soffice" 2>/dev/null || true
+    # Give it a moment to fully exit
+    sleep 1.5
+  fi
+
   local soc_url="$BASE_URL/themes/$flavor/$accent/catppuccin-$flavor-$accent.soc"
   local soc_file="$tmp/catppuccin-$flavor-$accent.soc"
 

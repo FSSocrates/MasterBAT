@@ -1,56 +1,68 @@
-# 🐱 Purrfection
+# Purrfection
 
-A self-contained theme switcher for **Catppuccin** on **LibreOffice**.
-No clone, no repo — just one script that downloads and applies the theme you pick.
+Interactive Catppuccin theme switcher for LibreOffice.
 
-## Requirements
+A self-contained script that lets you quickly apply any Catppuccin flavor + accent combination to LibreOffice.
 
-- `bash`
-- `curl`
-- LibreOffice installed
-- **Application theming enabled** in LibreOffice:
-  *Tools → Options → LibreOffice → Appearance → ☑ Enable application theming*
-  (do this once, then close all LibreOffice windows before running the script)
+> **Note:** This only installs the color palette and limited application colors.  
+> Full UI theming (toolbars, icons, etc.) is **not** supported by the upstream Catppuccin LibreOffice port.
 
-## Install
+## Features
+
+- Interactive menu with colored previews
+- Non-interactive mode
+- Current theme detection
+- Automatic backup of `registrymodifications.xcu`
+- Force-closes LibreOffice before applying changes
+- Works with both regular and Flatpak installs
+
+## Installation
 
 ```bash
-chmod +x Purrfection.sh
-mv Purrfection.sh ~/bin/
+mkdir -p ~/bin
+curl -sfL https://raw.githubusercontent.com/FSSocrates/MasterBAT/main/Catppuccin/LibreOffice/Purrfection -o ~/bin/Purrfection
+chmod +x ~/bin/Purrfection
 ```
-
-> `~/bin` should be on your `$PATH`. If not, add `export PATH="$HOME/bin:$PATH"` to `~/.bashrc`.
 
 ## Usage
 
+### Interactive mode
 ```bash
-Purrfection.sh                # interactive menu
-Purrfection.sh mocha mauve    # direct
-Purrfection.sh latte blue     # another combo
+Purrfection
 ```
 
-### Flavors
+### Non-interactive mode
+```bash
+Purrfection mocha blue
+# or
+Purrfection --flavor mocha --accent sapphire
+```
 
-| # | Flavor    |
-|---|-----------|
-| 1 | latte     |
-| 2 | frappe    |
-| 3 | macchiato |
-| 4 | mocha     |
+### Show current theme
+```bash
+Purrfection --current
+# or
+Purrfection -c
+```
 
-### Accents
+### Help
+```bash
+Purrfection --help
+```
 
-`rosewater` · `flamingo` · `red` · `maroon` · `mauve` · `blue` · `sapphire` · `sky` · `teal` · `green` · `yellow` · `peach`
+## Available Options
 
-## How it works
+**Flavors:** `latte` · `frappe` · `macchiato` · `mocha`  
 
-1. Downloads the selected `.soc` palette + the upstream install script into a temp dir.
-2. Copies the palette into your LibreOffice config.
-3. Runs the install script to apply the UI theme.
-4. Cleans up the temp dir.
+**Accents:** `rosewater` · `flamingo` · `red` · `maroon` · `mauve` · `blue` · `sapphire` · `sky` · `teal` · `green` · `yellow` · `peach`
 
-No persistent state, no clone, no fixed path.
+## Limitations
 
-## Credits
+- Only the color palette is reliably applied
+- Full UI chrome and icon theming is not available upstream
+- You still need to enable **Application theming** in  
+  `Tools → Options → LibreOffice → Appearance`
 
-Based on [catppuccin/libreoffice](https://github.com/catppuccin/libreoffice).   
+## License
+
+MIT

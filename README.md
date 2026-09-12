@@ -11,8 +11,6 @@ This repository is organized strictly by extension type folders at the top level
   - [RawBin](./Documents/RawBin)
 - **[EasyEffects](./EasyEffects)**
   - [Loud-n-Clear-AF-Bass-Boosted](./EasyEffects/Loud-n-Clear-AF-Bass-Boosted)
-- **[Music](./Music)**
-  - [Loud-n-Clear-AF-Bass-Boosted](./Music/Loud-n-Clear-AF-Bass-Boosted)
 <!-- DIRECTORY_LIST:END -->
 
 ## ⚙️ General Usage Note

@@ -59,7 +59,7 @@ accents=("rosewater" "flamingo" "red" "maroon" "mauve" "blue" \
 
 # ── Helper: print colored circle ────────────────────────────
 dot() {
-  local rgb=($3)
+  local rgb=($1)
   printf '\e[38;2;%s;%s;%sm●\e[0m' "${rgb[0]}" "${rgb[1]}" "${rgb[2]}"
 }
 
@@ -76,9 +76,8 @@ pick_flavor() {
   echo -e "  ${B}Flavor:${R}"
   for i in "${!flavors[@]}"; do
     local f="${flavors[$i]}"
-    local rgb=(${BASE[$f]})
     printf '   %2d. ' "$((i+1))"
-    dot "" "" "$rgb"
+    dot "${BASE[$f]}"
     printf ' %s\n' "$f"
   done
   read -rp "  Choose [1-4]: " n
@@ -91,9 +90,8 @@ pick_accent() {
   echo -e "  ${B}Accent:${R}"
   for i in "${!accents[@]}"; do
     local a="${accents[$i]}"
-    local rgb=(${ACCENT[$flavor:$a]})
     printf '   %2d. ' "$((i+1))"
-    dot "" "" "$rgb"
+    dot "${ACCENT[$flavor:$a]}"
     printf ' %s\n' "$a"
   done
   read -rp "  Choose [1-12]: " n

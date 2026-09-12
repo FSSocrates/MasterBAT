@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 # ─────────────────────────────────────────────────────────────
 #  Purrfection.sh — Catppuccin theme switcher for LibreOffice
-#  Self-contained: downloads only what's needed, no clone.
-#  Usage: Purrfection.sh [flavor] [accent]
+#  Self-contained interactive + non-interactive installer
 # ─────────────────────────────────────────────────────────────
 
 set -euo pipefail
 
 BASE_URL="https://raw.githubusercontent.com/catppuccin/libreoffice/main"
-CONFIG_DIR=$(ls -d "${XDG_CONFIG_HOME:-$HOME/.config}"/libreoffice/*/user/config 2>/dev/null | head -1)
 
 # ── Colors ──────────────────────────────────────────────────
 R=$'\e[0m'  B=$'\e[1m'
 C_RED=$'\e[38;2;242;135;145m'
+C_GREEN=$'\e[38;2;166;227;161m'
+C_YELLOW=$'\e[38;2;249;226;175m'
+C_BLUE=$'\e[38;2;137;180;250m'
 
-# Flavor base colors (R G B)
 declare -A BASE=(
   [latte]="239 241 245"
   [frappe]="48 52 70"
@@ -22,7 +22,6 @@ declare -A BASE=(
   [mocha]="30 30 46"
 )
 
-# Accent colors per flavor (R G B)
 declare -A ACCENT=(
   [latte:rosewater]="220 138 120"   [latte:flamingo]="221 120 120"
   [latte:red]="210 15 57"           [latte:maroon]="230 69 83"
@@ -54,25 +53,109 @@ declare -A ACCENT=(
 )
 
 flavors=("latte" "frappe" "macchiato" "mocha")
-accents=("rosewater" "flamingo" "red" "maroon" "mauve" "blue" \
+accents=("rosewater" "flamingo" "red" "maroon" "mauve" "blue"
          "sapphire" "sky" "teal" "green" "yellow" "peach")
 
-# ── Helper: print colored circle ────────────────────────────
 dot() {
   local rgb=($1)
   printf '\e[38;2;%s;%s;%sm●\e[0m' "${rgb[0]}" "${rgb[1]}" "${rgb[2]}"
 }
 
-# ── Banner ──────────────────────────────────────────────────
 banner() {
   echo
   echo -e "  ${B}░░ Catppuccin · LibreOffice ░░${R}"
   echo
 }
 
-# ── Pick flavor ─────────────────────────────────────────────
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [OPTIONS] [FLAVOR ACCENT]
+
+Interactive mode (default):
+  $(basename "$0")
+
+Non-interactive:
+  $(basename "$0") mocha blue
+  $(basename "$0") --flavor mocha --accent blue
+
+Options:
+  -c, --current     Show currently installed Catppuccin theme (if any)
+  -h, --help        Show this help
+  --flavor FLAVOR   Set flavor non-interactively
+  --accent ACCENT   Set accent non-interactively
+
+Flavors : ${flavors[*]}
+Accents : ${accents[*]}
+EOF
+}
+
+# ── Find registrymodifications.xcu ───────────────────────────
+find_xcu() {
+  local flatpak_glob="$HOME/.var/app/org.libreoffice.LibreOffice/config/libreoffice/*/user/registrymodifications.xcu"
+  if compgen -G "$flatpak_glob" &>/dev/null; then
+    realpath "$(compgen -G "$flatpak_glob" | head -n1)"
+    return
+  fi
+
+  local regular="${XDG_CONFIG_HOME:-$HOME/.config}/libreoffice/*/user/registrymodifications.xcu"
+  if compgen -G "$regular" &>/dev/null; then
+    realpath "$(compgen -G "$regular" | head -n1)"
+    return
+  fi
+  echo ""
+}
+
+# ── Detect current theme ────────────────────────────────────
+detect_current() {
+  local xcu
+  xcu=$(find_xcu)
+
+  if [[ -z "$xcu" ]]; then
+    echo -e "  ${C_YELLOW}⚠${R}  registrymodifications.xcu not found."
+    echo -e "     LibreOffice may not have been opened yet."
+    return 1
+  fi
+
+  # Look for the most recent catppuccin-*.soc reference inside the xcu
+  local current
+  current=$(grep -oE 'catppuccin-[a-z]+-[a-z]+\.soc' "$xcu" 2>/dev/null | tail -1 || true)
+
+  if [[ -z "$current" ]]; then
+    # Fallback: check the config directory for any installed .soc
+    local config_dir
+    config_dir=$(ls -d "${XDG_CONFIG_HOME:-$HOME/.config}"/libreoffice/*/user/config 2>/dev/null | head -1)
+    [[ -z "$config_dir" ]] && config_dir=$(ls -d "$HOME/.var/app/org.libreoffice.LibreOffice/config/libreoffice"/*/user/config 2>/dev/null | head -1)
+
+    if [[ -n "$config_dir" ]]; then
+      current=$(ls -1 "$config_dir"/catppuccin-*.soc 2>/dev/null | xargs -n1 basename 2>/dev/null | tail -1 || true)
+    fi
+  fi
+
+  if [[ -n "$current" ]]; then
+    # Extract flavor and accent from filename: catppuccin-mocha-blue.soc
+    local name="${current%.soc}"
+    local flavor="${name#catppuccin-}"
+    flavor="${flavor%-*}"
+    local accent="${name##*-}"
+
+    echo -e "  ${B}Current theme:${R}"
+    printf '    '
+    dot "${BASE[$flavor]}"
+    printf ' %s / ' "$flavor"
+    dot "${ACCENT[$flavor:$accent]}"
+    printf ' %s\n' "$accent"
+    echo -e "    ${C_BLUE}→${R} $current"
+  else
+    echo -e "  ${C_YELLOW}No Catppuccin theme currently detected.${R}"
+  fi
+}
+
+# ── Interactive pickers ─────────────────────────────────────
 pick_flavor() {
-  if [[ -n "${1:-}" ]]; then flavor="$1"; return; fi
+  if [[ -n "${1:-}" ]]; then
+    flavor="$1"
+    return
+  fi
   echo -e "  ${B}Flavor:${R}"
   for i in "${!flavors[@]}"; do
     local f="${flavors[$i]}"
@@ -84,9 +167,11 @@ pick_flavor() {
   flavor="${flavors[$((n-1))]}"
 }
 
-# ── Pick accent ─────────────────────────────────────────────
 pick_accent() {
-  if [[ -n "${1:-}" ]]; then accent="$1"; return; fi
+  if [[ -n "${1:-}" ]]; then
+    accent="$1"
+    return
+  fi
   echo -e "  ${B}Accent:${R}"
   for i in "${!accents[@]}"; do
     local a="${accents[$i]}"
@@ -98,44 +183,151 @@ pick_accent() {
   accent="${accents[$((n-1))]}"
 }
 
-# ── Apply ───────────────────────────────────────────────────
+# ── Apply theme ─────────────────────────────────────────────
 apply() {
-  local tmp; tmp="$(mktemp -d)"
+  local tmp
+  tmp="$(mktemp -d)"
+  trap 'rm -rf "$tmp"' EXIT
+
   local soc_url="$BASE_URL/themes/$flavor/$accent/catppuccin-$flavor-$accent.soc"
-  local script_url="$BASE_URL/scripts/install_theme.sh"
+  local soc_file="$tmp/catppuccin-$flavor-$accent.soc"
 
   echo -e "  ${B}↓${R} Downloading ${flavor}/${accent}…"
 
-  curl -sfL "$soc_url" -o "$tmp/palette.soc"
-  curl -sfL "$script_url" -o "$tmp/install.sh"
-  chmod +x "$tmp/install.sh"
-
-  if [[ ! -f "$tmp/palette.soc" || ! -f "$tmp/install.sh" ]]; then
-    echo -e "  ${C_RED}✗${R} Download failed." >&2
-    rm -rf "$tmp"; exit 1
+  if ! curl -sfL "$soc_url" -o "$soc_file"; then
+    echo -e "  ${C_RED}✗${R} Failed to download palette." >&2
+    exit 1
   fi
 
-  cp "$tmp/palette.soc" "$CONFIG_DIR"
+  # 1. Install palette
+  local config_dir
+  config_dir=$(ls -d "${XDG_CONFIG_HOME:-$HOME/.config}"/libreoffice/*/user/config 2>/dev/null | head -1)
+  [[ -z "$config_dir" ]] && config_dir=$(ls -d "$HOME/.var/app/org.libreoffice.LibreOffice/config/libreoffice"/*/user/config 2>/dev/null | head -1)
 
-  # Resolve xcu path and patch the upstream script to use it
+  if [[ -z "$config_dir" ]]; then
+    echo -e "  ${C_RED}✗${R} Could not find LibreOffice config directory."
+    echo -e "     Open LibreOffice once, then re-run." >&2
+    exit 1
+  fi
+
+  # Clean old catppuccin palettes to avoid clutter
+  rm -f "$config_dir"/catppuccin-*.soc 2>/dev/null || true
+  cp "$soc_file" "$config_dir/"
+  echo -e "  ${C_GREEN}✓${R} Palette installed → $config_dir"
+
+  # 2. Apply application colors
   local xcu
-  xcu=$(find "${XDG_CONFIG_HOME:-$HOME/.config}/libreoffice" -name "registrymodifications.xcu" 2>/dev/null | head -1)
+  xcu=$(find_xcu)
+
   if [[ -z "$xcu" ]]; then
     echo -e "  ${C_RED}✗${R} registrymodifications.xcu not found."
-    echo -e "  Open LibreOffice once, enable theming, close it, then re-run." >&2
-    rm -rf "$tmp"; exit 1
+    echo -e "     Open LibreOffice → Tools → Options → LibreOffice → Appearance"
+    echo -e "     Enable “Application theming”, fully quit LibreOffice, then re-run." >&2
+    exit 1
   fi
 
-  sed -i "s|realpath .*|realpath '$xcu'|" "$tmp/install.sh"
-  bash "$tmp/install.sh" "$flavor" "$accent"
+  if ! tail -n1 "$xcu" | grep -qE '^</oor:items>$'; then
+    echo -e "  ${C_RED}✗${R} Unexpected format in registrymodifications.xcu — aborting." >&2
+    exit 1
+  fi
 
-  rm -rf "$tmp"
+  # Backup
+  local bak="${xcu}.$(date -u +%Y-%m-%dT%H:%M:%SZ).bak"
+  cp "$xcu" "$bak"
+  echo -e "  ${C_GREEN}✓${R} Backup created → $(basename "$bak")"
+
+  # Remove any previous Catppuccin entries to avoid duplicates
+  local cleaned
+  cleaned=$(grep -v 'catppuccin-.*\.soc' "$xcu" || true)
+
+  # Inject new theme just before the closing tag
+  local new_settings
+  new_settings="$(printf '%s\n' "$cleaned" | head -n -1)
+$(cat "$soc_file")
+$(printf '%s\n' "$cleaned" | tail -n1)"
+
+  printf '%s\n' "$new_settings" > "$xcu"
+
+  echo -e "  ${C_GREEN}✓${R} Application colors applied"
 }
+
+# ── Argument parsing ────────────────────────────────────────
+flavor=""
+accent=""
+show_current=false
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -c|--current)
+      show_current=true
+      shift
+      ;;
+    --flavor)
+      flavor="$2"
+      shift 2
+      ;;
+    --accent)
+      accent="$2"
+      shift 2
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      usage
+      exit 1
+      ;;
+    *)
+      # positional: flavor accent
+      if [[ -z "$flavor" ]]; then
+        flavor="$1"
+      elif [[ -z "$accent" ]]; then
+        accent="$1"
+      else
+        echo "Too many arguments" >&2
+        usage
+        exit 1
+      fi
+      shift
+      ;;
+  esac
+done
 
 # ── Main ────────────────────────────────────────────────────
 banner
-pick_flavor "${1:-}"
-pick_accent "${2:-}"
+
+if $show_current; then
+  detect_current
+  echo
+  exit 0
+fi
+
+# Validate if non-interactive values were given
+if [[ -n "$flavor" && -z "$accent" ]] || [[ -z "$flavor" && -n "$accent" ]]; then
+  echo -e "  ${C_RED}✗${R} Both flavor and accent are required in non-interactive mode." >&2
+  exit 1
+fi
+
+if [[ -n "$flavor" ]]; then
+  # Non-interactive validation
+  if [[ ! " ${flavors[*]} " =~ " ${flavor} " ]]; then
+    echo -e "  ${C_RED}✗${R} Invalid flavor: $flavor" >&2
+    exit 1
+  fi
+  if [[ ! " ${accents[*]} " =~ " ${accent} " ]]; then
+    echo -e "  ${C_RED}✗${R} Invalid accent: $accent" >&2
+    exit 1
+  fi
+else
+  # Interactive
+  pick_flavor
+  pick_accent
+fi
+
 echo
 apply
-echo -e "  ${B}✓${R} ${flavor} / ${accent} applied.\n"   
+echo
+echo -e "  ${B}✓ ${flavor} / ${accent} applied successfully.${R}"
+echo -e "  Restart LibreOffice to see the full theme.\n"
